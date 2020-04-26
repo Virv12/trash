@@ -104,8 +104,21 @@ int main(int argc, char** argv) {
 
 	filesystem::create_directories(trash);
 
-	while (*++argv)
-		toTrash(*argv);
+	bool escape = false;
+	for (int i = 1; i < argc; i++)
+		if (escape) {
+			toTrash(argv[i]);
+
+		} else if (!strcmp(argv[i], "--")) {
+			escape = true;
+
+		} else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
+			printf("Usage: %s [-h | --help] [--] [FILE]...\n", argv[0]);
+			exit(0);
+
+		} else {
+			toTrash(argv[i]);
+		}
 
 	clean();
 }

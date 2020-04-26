@@ -9,5 +9,5 @@ make && sudo make install
 
 # Usage
 ```bash
-trash [FILE]...
+trash [-h | --help] [--] [FILE]...
 ```
