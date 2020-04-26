@@ -1,0 +1,2 @@
+# trash
+simple automatic trash
