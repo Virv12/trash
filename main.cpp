@@ -99,6 +99,47 @@ void clean() {
 	printf("Trash size: %lu%s\n", T, &units[4 * unit]);
 }
 
+void restore() {
+	int pfds[2], status;
+	pipe(pfds);
+
+	pid_t pid = fork();
+	if (!pid) {
+		close(pfds[0]);
+		dup2(pfds[1], fileno(stdout));
+
+		chdir(trash);
+		execlp("fzf", "fzf", nullptr);
+		fprintf(stderr, "fzf did not start\n");
+		exit(1);
+	}
+
+	close(pfds[1]);
+
+	if (waitpid(pid, &status, 0) == -1) {
+		fprintf(stderr, "Error fzf\n");
+		exit(1);
+	}
+
+	if (WIFEXITED(status) && WEXITSTATUS(status)) {
+		fprintf(stderr, "Error fzf, return code: %d\n", WEXITSTATUS(status));
+		exit(WEXITSTATUS(status));
+	}
+
+	char buf[PATH_MAX];
+	strcpy(buf, trash);
+	buf[trashLen] = '/';
+	read(pfds[0], buf + trashLen + 1, sizeof(buf));
+	buf[strlen(buf) - 1] = 0;
+
+	fprintf(stderr, "file to restore: %s\n", buf);
+
+	chdir("/");
+	execlp("unzip", "unzip", buf, nullptr);
+	fprintf(stderr, "unzip did not start\n");
+	exit(1);
+}
+
 int main(int argc, char** argv) {
 	(void)argc;
 
@@ -115,6 +156,9 @@ int main(int argc, char** argv) {
 		} else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
 			printf("Usage: %s [-h | --help] [--] [FILE]...\n", argv[0]);
 			exit(0);
+
+		} else if (!strcmp(argv[i], "-r") || !strcmp(argv[i], "--restore")) {
+			restore();
 
 		} else {
 			toTrash(argv[i]);
