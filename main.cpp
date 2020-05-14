@@ -28,8 +28,8 @@ void toTrash(const char* const file) {
 	char rp[PATH_MAX];
 	realpath(file, rp);
 
-	time_t t = time(0);
-	size_t S = snprintf(nullptr, 0, "%s/%lu:%s.zip", trash, t, rp);
+	const time_t t = time(0);
+	const size_t S = snprintf(nullptr, 0, "%s/%lu:%s.zip", trash, t, rp);
 	char full_path[S + 1];
 	int i;
 	sprintf(full_path, "%s/%lu:%n%s.zip", trash, t, &i, rp);
@@ -60,7 +60,7 @@ void toTrash(const char* const file) {
 void clean() {
 	size_t T = 0;
 	vector<tuple<time_t, size_t, const char*>> V;
-	DIR *dir;
+	DIR* dir;
 	struct stat stat_path, stat_entry;
 	dirent *entry;
 
@@ -74,7 +74,7 @@ void clean() {
 		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
 			continue;
 
-		char* full_path = new char[trashLen + strlen(entry->d_name) + 2];
+		char* const full_path = new char[trashLen + strlen(entry->d_name) + 2];
 		sprintf(full_path, "%s/%s", trash, entry->d_name);
 
 		stat(full_path, &stat_entry);
@@ -84,7 +84,7 @@ void clean() {
 	closedir(dir);
 
 	sort(V.begin(), V.end());
-	for (auto [ctime, S, file] : V) {
+	for (const auto [ctime, S, file] : V) {
 		if (T + S > maxSize) {
 			printf("Removing %s\n", file);
 			remove(file);
@@ -145,9 +145,7 @@ void restore() {
 	exit(1);
 }
 
-int main(int argc, char** argv) {
-	(void)argc;
-
+int main(const int argc, const char* const argv[]) {
 	filesystem::create_directories(trash);
 
 	bool escape = false;
