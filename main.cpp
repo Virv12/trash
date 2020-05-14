@@ -1,8 +1,12 @@
-#include <string.h>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+#include <ctime>
 
-#include <filesystem>
 #include <algorithm>
+#include <array>
+#include <filesystem>
+#include <vector>
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -25,11 +29,12 @@ void toTrash(const char* const file) {
 	realpath(file, rp);
 
 	time_t t = time(0);
-	size_t S = snprintf(nullptr, 0, "%s/%s/%ld.zip", trash, rp, t);
+	size_t S = snprintf(nullptr, 0, "%s/%lu:%s.zip", trash, t, rp);
 	char full_path[S + 1];
-	sprintf(full_path, "%s/%s/%ld.zip", trash, rp, t);
+	int i;
+	sprintf(full_path, "%s/%lu:%n%s.zip", trash, t, &i, rp);
 
-	for (size_t i = trashLen + 1; full_path[i]; i++)
+	for (; full_path[i]; i++)
 		if (full_path[i] == '/')
 			full_path[i] = '%';
 
